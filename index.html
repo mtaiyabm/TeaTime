@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Tea Time</title>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script>
+            function init() {
+                $("#div_members").empty();
+                var members = JSON.parse(localStorage.getItem("members"));
+                $.each(members, function (i, e) {
+                    $("#div_members").append($('<div id="ck-button"><label><input type="checkbox" name="'+e+'"><span>'+e+'</span></label></div>'));
+                });
+
+                $("#participants").empty();
+                if (!members || members.length == 0) {
+                    $("#participants").append("Please Add Members");
+                } else {
+                    $("#participants").append("Please Select Participants");
+                }
+                $("#participants").css("color", "#0078e7");
+            }
+
+            function goToStep0() {
+                $("#div_step1").slideUp();
+                $("#div_step0").slideDown();
+                $("#members").empty();
+
+                var members = JSON.parse(localStorage.getItem("members"));
+                $.each(members, function(i, e) {
+                    $("#members").append(e+"\n");
+                });
+            }
+
+            function add() {
+                var members = [];
+
+                $.each($("#members").val().split(/\n/), function(i, e) {
+                    if (e.trim() != "") {
+                        members.push(e.trim().toUpperCase());
+                    }
+                });
+
+                localStorage.setItem("members", JSON.stringify(members));
+
+                goToStep1();
+            }
+
+            function goToStep1() {
+                init();
+                $("#div_step0").slideUp();
+                $("#div_step1").slideDown();
+                $("#div_step2").slideUp();
+            }
+
+            function list() {
+                var participants = [];
+                $.each($("#div_members input:checked"), function (i, e) {
+                    participants.push($(e).attr("name"));
+                });
+
+                if (participants.length == 0) {
+                    $("#participants").css("color", "red");
+                    return;
+                }
+
+                $("#div_step1").slideUp();
+                $("#div_step2").show();
+
+                $("#btn_back").hide();
+                $("#lucky").hide();
+
+                $("#dice").slideDown().delay(5000).slideUp(500, function() {
+                    $("#lucky_wait").slideDown(1000).delay(400).slideUp(800, function() {
+                        $("#lucky_wait_more").slideDown(1000).delay(1000).slideUp(800, function() {
+                            $("#lucky_wait_more_and").slideDown(500).delay(2000).slideUp(1000, function() {
+                                var lucky = participants[Math.floor(Math.random() * participants.length)];
+                                $("#lucky").empty().append(lucky);
+                                $("#lucky").slideDown(2000, function() {
+                                    $("#btn_back").delay(5000).slideDown(1000);
+                                });
+                            });
+                        });
+                    });
+                });
+
+                $("#div_step3").slideDown();
+            }
+        </script>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                font-size: xx-large;
+            }
+            .container {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+            }
+            h1 {
+                background: rgba(0, 0, 0, 0.4);
+                color: white;
+                text-align: center;
+                //font-size: 30px;
+                //height: 50px;
+                //line-height: 50px;
+            }
+            h3 {
+                color: #0078e7;
+            }
+            button {
+                font-size: xx-large;
+                background: #0078e7;
+                color: white;
+                border: none;
+                width: 100%;
+                margin-top: 20px;
+            }
+            textarea {
+                width: 98%;
+                height: 500px;
+                font-size: x-large;
+                background: rgba(255,255, 200,0.4);
+            }
+            .step {
+                width: 80%;
+                margin: 0 auto;
+                text-align: center;
+            }
+            .hidden {
+                display: none;
+            }
+
+
+
+            div label input {
+                margin-right: 100px;
+            }
+            #ck-button {
+                width: 100%;
+                margin: 4px 0;
+                float: left;
+                border-radius: 4px;
+                background-color: rgba(255,255,255,0.4);
+                //border: 1px solid #D0D0D0;
+                overflow: auto;
+            }
+
+            #ck-button label {
+                //float: left;
+                //width: 90%;
+                //font-size: 24px;
+            }
+
+            #ck-button label span {
+                text-align: center;
+                padding: 3px 0px;
+                display: block;
+            }
+
+            #ck-button label input {
+                position: absolute;
+                top: -20px;
+            }
+
+            #ck-button input:checked + span {
+                background-color: #11994F;
+                color: #fff;
+            }
+
+        </style>
+    </head>
+    <body onload="goToStep1()" style="background: url(images/background.jpg)">
+        <div class="container">
+            <div style="width: 80%; margin: 0 auto; background: rgba(100, 100, 100, 0.3);">
+                <h1>Tea Time</h1>
+                <div id="div_step0" class="step hidden">
+                    <h3>Members</h3>
+                    <textarea id="members"></textarea>
+                    <button style="" onclick="add()">Add</button>
+                </div>
+                <div id="div_step1" class="step">
+                    <button style="background: darkslateblue;" onclick="goToStep0()">Add Members</button>
+                    <h3 id="participants"></h3>
+                    <div id="div_members">
+                        <div id="ck-button">
+                            <label>
+                                <input type="checkbox" value="1"><span>red</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button style="" onclick="list()">Draw</button>
+                </div>
+                <div id="div_step2" class="step hidden">
+                    <div id="dice" style="max-width: 100%; max-height: 100%; margin: 0 auto; display: none;">
+                        <img alt="" src="images/ring.gif">
+                    </div>
+                    <h2 id="lucky_wait" style="display: none; color: #0078e7;">and the LUCKY GUY is</h2>
+                    <h2 id="lucky_wait_more" style="display: none; color: #ffffff;">little more wait</h2>
+                    <h2 id="lucky_wait_more_and" style="display: none; color: #0078e7;">... and ...</h2>
+                    <h2 id="lucky" style="display: none; color: red;"></h2>
+                    <button id="btn_back" class="hidden" onclick="goToStep1()">Redraw</button>
+                </div>
+                <h1>408 Serangoon, Singapore</h1>
+            </div>
+        </div>
+    </body>
+</html>
